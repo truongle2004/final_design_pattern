@@ -27,6 +27,7 @@ public class StudentManagementUI extends JFrame {
     private final JLabel searchLabel;
     private final JTextField searchField;
     private final JButton searchButton;
+    private boolean checkbox1, checkbox2;
 
     public StudentManagementUI(StudentService studentService) {
         this.studentService = studentService;
@@ -103,6 +104,26 @@ public class StudentManagementUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 searchStudentByName();
+            }
+        });
+
+        textBookCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (textBookCheckBox.isSelected()) {
+                    checkbox1 = true;
+                } else {
+                    checkbox1 = false;
+                }
+            }
+        });
+
+        OldBookCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (OldBookCheckBox.isSelected()) {
+                    checkbox2 = true;
+                } else {
+                    checkbox2 = false;
+                }
             }
         });
 
