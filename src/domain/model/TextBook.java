@@ -3,9 +3,8 @@ package domain.model;
 public class TextBook extends Book {
     private String status;
 
-    public TextBook(int id, int day, int month, int year, double price, int quantity, int publisher, String status,
-            double totalAmount) {
-        super(id, day, month, year, price, quantity, publisher, totalAmount);
+    public TextBook(int id, String date, double price, int quantity, String publisher, String status) {
+        super(id, date, price, quantity, publisher);
         this.status = status;
     }
 

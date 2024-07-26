@@ -3,9 +3,8 @@ package domain.model;
 public class ReferenceBook extends Book {
     private double tax;
 
-    public ReferenceBook(int id, int day, int month, int year, double price, int quantity, int publisher, double tax,
-            double totalAmount) {
-        super(id, day, month, year, price, quantity, publisher, totalAmount);
+    public ReferenceBook(int id, String date, double price, int quantity, String publisher, double tax) {
+        super(id, date, price, quantity, publisher);
         this.tax = tax;
     }
 
