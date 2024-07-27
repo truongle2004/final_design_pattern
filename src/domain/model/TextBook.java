@@ -18,9 +18,9 @@ public class TextBook extends Book {
 
     @Override
     public double calculateTotalAmount() {
-        if (this.status == "new") {
+        if (this.status.equals("new")) {
             return getQuantity() * getPrice();
         }
-        return getQuantity() * getPrice() * (50 / 100);
+        return getQuantity() * getPrice() * 0.5;
     }
 }

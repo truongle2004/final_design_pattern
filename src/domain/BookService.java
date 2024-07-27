@@ -16,8 +16,12 @@ public interface BookService {
 
     List<Book> getAllBooks() throws SQLException;
 
-    // List<Student> searchStudentsByName(String name);
+    List<Book> findBookByPublisher(String publisher) throws SQLException;
 
-    // List<Student> searchFullTextStudentsByName(String query);
+    double AvgPriceBook() throws SQLException;
+
+    double getTotalAmountTextBook() throws SQLException;
+
+    double getTotalAmountReferenceBook() throws SQLException;
 
 }

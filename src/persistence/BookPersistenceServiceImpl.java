@@ -29,12 +29,12 @@ public class BookPersistenceServiceImpl implements BookPersistenceService {
         preparedStatement.setString(5, book.getPublisher());
         if (book instanceof TextBook) {
             TextBook textBook = (TextBook) book;
-            preparedStatement.setNull(6, java.sql.Types.DECIMAL); // tax is null
+            preparedStatement.setNull(6, java.sql.Types.DECIMAL);
             preparedStatement.setString(7, textBook.getStatus());
         } else if (book instanceof ReferenceBook) {
             ReferenceBook referenceBook = (ReferenceBook) book;
             preparedStatement.setDouble(6, referenceBook.getTax());
-            preparedStatement.setNull(7, java.sql.Types.VARCHAR); // status is null
+            preparedStatement.setNull(7, java.sql.Types.VARCHAR);
         }
 
         preparedStatement.executeUpdate();
@@ -113,15 +113,15 @@ public class BookPersistenceServiceImpl implements BookPersistenceService {
 
             if (book instanceof TextBook) {
                 TextBook textBook = (TextBook) book;
-                preparedStatement.setNull(5, java.sql.Types.DECIMAL); // tax is null for TextBook
+                preparedStatement.setNull(5, java.sql.Types.DECIMAL);
                 preparedStatement.setString(6, textBook.getStatus());
             } else if (book instanceof ReferenceBook) {
                 ReferenceBook referenceBook = (ReferenceBook) book;
                 preparedStatement.setDouble(5, referenceBook.getTax());
-                preparedStatement.setNull(6, java.sql.Types.VARCHAR); // status is null for ReferenceBook
+                preparedStatement.setNull(6, java.sql.Types.VARCHAR);
             }
 
-            preparedStatement.setInt(7, book.getId()); // id is the last parameter
+            preparedStatement.setInt(7, book.getId());
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -229,6 +229,116 @@ public class BookPersistenceServiceImpl implements BookPersistenceService {
             }
         }
         return books;
+    }
+
+    @Override
+    public double avgPriceBook() throws SQLException {
+        String query = "SELECT AVG(price) AS avg_price FROM book WHERE status IS NULL";
+        connection = DbConnection.getDbConnection();
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        double avgPrice = 0.0;
+
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+
+            if (resultSet.next()) {
+                avgPrice = resultSet.getDouble("avg_price");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+        }
+
+        return avgPrice;
+    }
+
+    @Override
+    public double totalAmountTextBook() throws SQLException {
+        String query = "SELECT * FROM book where tax is null";
+        connection = DbConnection.getDbConnection();
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        double totalAmount = 0.0;
+
+        try {
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                System.out.println(totalAmount);
+                int id = resultSet.getInt("id");
+                String date = resultSet.getString("date");
+                double price = resultSet.getDouble("price");
+                int quantity = resultSet.getInt("quantity");
+                String publisher = resultSet.getString("publisher");
+                String status = resultSet.getString("status");
+
+                TextBook textBook = new TextBook(id, date, price, quantity, publisher,
+                        status);
+                totalAmount += textBook.calculateTotalAmount();
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+        }
+        return totalAmount;
+    }
+
+    @Override
+    public double totalAmountReferenceBook() throws SQLException {
+        String query = "SELECT * FROM book where status is null";
+        connection = DbConnection.getDbConnection();
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        double totalAmount = 0.0;
+
+        try {
+            System.out.println(totalAmount);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String date = resultSet.getString("date");
+                double price = resultSet.getDouble("price");
+                int quantity = resultSet.getInt("quantity");
+                String publisher = resultSet.getString("publisher");
+
+                double tax = resultSet.getDouble("tax");
+                ReferenceBook referenceBook = new ReferenceBook(id, date, price, quantity, publisher, tax);
+                totalAmount += referenceBook.calculateTotalAmount();
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+        }
+        return totalAmount;
     }
 
 }

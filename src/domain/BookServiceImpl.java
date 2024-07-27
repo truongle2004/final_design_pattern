@@ -1,6 +1,7 @@
 package domain;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import domain.model.Book;
@@ -12,6 +13,11 @@ public class BookServiceImpl extends Publisher implements BookService {
 
     public BookServiceImpl(BookPersistenceServiceImpl persistenceService) {
         this.persistenceService = persistenceService;
+    }
+
+    @Override
+    public List<Book> getAllBooks() throws SQLException {
+        return persistenceService.getAllBooksFromDb();
     }
 
     @Override
@@ -29,6 +35,7 @@ public class BookServiceImpl extends Publisher implements BookService {
     @Override
     public void editBook(Book book) throws SQLException {
         persistenceService.updateBook(book);
+        notifySubscribers();
     }
 
     @Override
@@ -37,34 +44,22 @@ public class BookServiceImpl extends Publisher implements BookService {
     }
 
     @Override
-    public List<Book> getAllBooks() throws SQLException {
-        return persistenceService.getAllBooksFromDb();
+    public List<Book> findBookByPublisher(String publisher) throws SQLException {
+        return persistenceService.findBooksByPublisher(publisher);
     }
 
-    // @Override
-    // public List<Student> searchStudentsByName(String name) {
-    // List<Student> allStudents = persistenceService.getAllStudents();
-    // List<Student> matchingStudents = new ArrayList<>();
-    // for (Student student : allStudents) {
-    // if (student.getName().contains(name)) {
-    // matchingStudents.add(student);
-    // }
-    // }
-    // return matchingStudents;
-    // }
+    @Override
+    public double AvgPriceBook() throws SQLException {
+        return persistenceService.avgPriceBook();
+    }
 
-    // @Override
-    // public List<Student> searchFullTextStudentsByName(String query) {
-    // List<Student> allStudents = persistenceService.getAllStudents();
-    // List<Student> matchingStudents = new ArrayList<>();
+    @Override
+    public double getTotalAmountTextBook() throws SQLException {
+        return persistenceService.totalAmountTextBook();
+    }
 
-    // for (Student student : allStudents) {
-    // if (containsIgnoreCase(student.getName(), query)) {
-    // matchingStudents.add(student);
-    // }
-    // }
-
-    // return matchingStudents;
-    // }
-
+    @Override
+    public double getTotalAmountReferenceBook() throws SQLException {
+        return persistenceService.totalAmountReferenceBook();
+    }
 }

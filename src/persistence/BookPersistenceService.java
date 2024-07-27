@@ -17,4 +17,10 @@ public interface BookPersistenceService {
     List<Book> getAllBooksFromDb() throws SQLException;
 
     List<Book> findBooksByPublisher(String publisherName) throws SQLException;
+
+    double avgPriceBook() throws SQLException;
+
+    double totalAmountTextBook() throws SQLException;
+
+    double totalAmountReferenceBook() throws SQLException;
 }

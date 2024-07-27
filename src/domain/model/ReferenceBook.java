@@ -18,7 +18,7 @@ public class ReferenceBook extends Book {
 
     @Override
     public double calculateTotalAmount() {
-        return (getPrice() * getQuantity()) + getTax();
+        return (double) (getPrice() * getQuantity()) + getTax();
     }
 
 }

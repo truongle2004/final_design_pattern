@@ -15,5 +15,4 @@ public class editBookCommand extends Command {
     public void execute() throws SQLException {
         bookService.editBook(book);
     }
-
 }

@@ -3,12 +3,16 @@ package presentation;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import commandProcessor.Command;
+import commandProcessor.AvgPriceBookCommand;
 import commandProcessor.BookController;
+import commandProcessor.Command;
 import commandProcessor.addBookCommand;
-import commandProcessor.findBookCommand;
+import commandProcessor.editBookCommand;
+import commandProcessor.findBookByIdCommand;
+import commandProcessor.findBookByPublisherCommand;
 import commandProcessor.removeBookCommand;
-import domain.BookService;
+import commandProcessor.totalAmountReferenceBookCommand;
+import commandProcessor.totalAmountTextBookCommand;
 import domain.model.Book;
 import domain.model.ReferenceBook;
 import domain.model.TextBook;
@@ -23,24 +27,23 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class BookManagementUI extends JFrame implements Subscriber {
-    private BookController commandProcessor = null;
+    private BookController bookController = null;
     private final BookService bookService;
     private final DefaultTableModel tableModel;
     private final JTable bookTable;
     private final JLabel idLabel, dateLabel, priceLabel, quantityLabel, publisherLabel, statusLabel, taxLabel,
-            textBookLabel, referenceBookLabel;
-    private final JTextField idField, dateField, priceField, quantityField, publisherField, statusField, taxField;
-    private final JButton addButton, removeButton, editButton, findButton;
+            textBookLabel, referenceBookLabel, totalAmountOfTextBookLabel, totalAmountOfReferenceLabel, AvgLabel;
+    private final JTextField idField, dateField, priceField, quantityField, publisherField, statusField, taxField,
+            AvgField,
+            totalAmountOfTextBookField, totalAmountOfReferenceBookField;
+    private final JButton addButton, removeButton, editButton, findButton, clearButton, refreshTableButton, AvgButton,
+            totalAmountTextBookButton, totalAmountReferenceButton;
     private final JCheckBox textBookCheckBox, referenceBookCheckBox;
 
     // search
     private final JLabel searchLabel;
     private final JTextField searchField;
     private final JButton searchButton;
-    // TODO: add textfield show total amount
-    // TODO: add button find book by name of publisher
-    // TODO: using dto class
-    // TODO: Conserdering about command pattern
 
     public BookManagementUI(BookService bookService) throws SQLException {
         this.bookService = bookService;
@@ -56,6 +59,9 @@ public class BookManagementUI extends JFrame implements Subscriber {
         taxLabel = new JLabel("tax:");
         textBookLabel = new JLabel("text book");
         referenceBookLabel = new JLabel("reference book");
+        totalAmountOfTextBookLabel = new JLabel("total amount text book");
+        totalAmountOfReferenceLabel = new JLabel("total amount of reference book");
+        AvgLabel = new JLabel("Average total amount reference book");
 
         idField = new JTextField(10);
         dateField = new JTextField(20);
@@ -64,6 +70,9 @@ public class BookManagementUI extends JFrame implements Subscriber {
         publisherField = new JTextField(20);
         statusField = new JTextField(20);
         taxField = new JTextField(20);
+        totalAmountOfTextBookField = new JTextField(10);
+        totalAmountOfReferenceBookField = new JTextField(10);
+        AvgField = new JTextField(10);
 
         textBookCheckBox = new JCheckBox();
         referenceBookCheckBox = new JCheckBox();
@@ -72,14 +81,62 @@ public class BookManagementUI extends JFrame implements Subscriber {
         removeButton = new JButton("Remove");
         editButton = new JButton("Edit");
         findButton = new JButton("Find");
+        clearButton = new JButton("Clear");
+        refreshTableButton = new JButton("Refresh");
+        totalAmountTextBookButton = new JButton("get");
+        totalAmountReferenceButton = new JButton("get");
+        AvgButton = new JButton("get");
 
-        searchLabel = new JLabel("Search by id:");
+        searchLabel = new JLabel("Search by publisher:");
         searchField = new JTextField(20);
         searchButton = new JButton("Search");
 
         String[] columnNames = { "id", "date", "price", "quantity", "publisher", "status", "tax", "type" };
         tableModel = new DefaultTableModel(columnNames, 0);
         bookTable = new JTable(tableModel);
+
+        totalAmountTextBookButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    totalAmountTextBook();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+        });
+
+        totalAmountReferenceButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    totalAmountReferenceBook();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+        });
+        refreshTableButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    refreshbookTable();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+        });
+
+        clearButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearInputFields();
+            }
+        });
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -103,25 +160,43 @@ public class BookManagementUI extends JFrame implements Subscriber {
             }
         });
 
-        // editButton.addActionListener(new ActionListener() {
-        // @Override
-        // public void actionPerformed(ActionEvent e) {
-        // editStudent();
-        // }
-        // });
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    editBook();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
 
-        // findButton.addActionListener(new ActionListener() {
-        // @Override
-        // public void actionPerformed(ActionEvent e) {
-        // findStudent();
-        // }
-        // });
+        findButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    findBookById();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
 
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    searchBookById();
+                    searchBookByPublisher();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        AvgButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    AvgPrice();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -204,12 +279,38 @@ public class BookManagementUI extends JFrame implements Subscriber {
         gbc.gridx++;
         inputPanel.add(searchField, gbc);
 
+        gbc.gridy++;
+        gbc.gridx = 0;
+        inputPanel.add(totalAmountOfTextBookLabel, gbc);
+        gbc.gridx++;
+        inputPanel.add(totalAmountOfTextBookField, gbc);
+        gbc.gridx++;
+        inputPanel.add(totalAmountTextBookButton, gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        inputPanel.add(totalAmountOfReferenceLabel, gbc);
+        gbc.gridx++;
+        inputPanel.add(totalAmountOfReferenceBookField, gbc);
+        gbc.gridx++;
+        inputPanel.add(totalAmountReferenceButton, gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        inputPanel.add(AvgLabel, gbc);
+        gbc.gridx++;
+        inputPanel.add(AvgField, gbc);
+        gbc.gridx++;
+        inputPanel.add(AvgButton, gbc);
+
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
         buttonPanel.add(editButton);
         buttonPanel.add(findButton);
         buttonPanel.add(searchButton);
+        buttonPanel.add(clearButton);
+        buttonPanel.add(refreshTableButton);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(new JScrollPane(bookTable), BorderLayout.CENTER);
@@ -218,9 +319,9 @@ public class BookManagementUI extends JFrame implements Subscriber {
         // mainPanel.add(searchPanel);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        this.setTitle("Student Management System");
+        this.setTitle("Book Management System");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(800, 500);
+        this.setSize(800, 700);
         this.add(mainPanel);
         this.setVisible(true);
 
@@ -234,18 +335,18 @@ public class BookManagementUI extends JFrame implements Subscriber {
             int quantity = Integer.parseInt(quantityField.getText());
             String publisher = publisherField.getText();
             String date = dateField.getText();
-            commandProcessor = BookController.makeCommandProcessor();
+            bookController = BookController.getInstance();
             if (textBookCheckBox.isSelected()) {
                 String status = statusField.getText();
                 Command command = new addBookCommand(new TextBook(id, date, price, quantity, publisher, status),
                         bookService);
-                commandProcessor.execute(command);
+                bookController.execute(command);
             } else {
 
                 double tax = Double.parseDouble(taxField.getText());
                 Command command = new addBookCommand(new ReferenceBook(id, date, price, quantity, publisher, tax),
                         bookService);
-                commandProcessor.execute(command);
+                bookController.execute(command);
             }
 
             // Clear input fields
@@ -259,7 +360,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
             // Refresh the table
             refreshbookTable();
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid input for marks or ID. Please enter valid numbers.");
+            JOptionPane.showMessageDialog(this, "Invalid input");
         }
     }
 
@@ -267,12 +368,12 @@ public class BookManagementUI extends JFrame implements Subscriber {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
             int bookId = (int) bookTable.getValueAt(selectedRow, 0);
-            commandProcessor = BookController.makeCommandProcessor();
+            bookController = BookController.getInstance();
             Command command = new removeBookCommand(bookId, bookService);
-            commandProcessor.execute(command);
+            bookController.execute(command);
             clearInputFields();
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a student to remove.");
+            JOptionPane.showMessageDialog(this, "Please select a book to remove.");
         }
     }
 
@@ -285,54 +386,57 @@ public class BookManagementUI extends JFrame implements Subscriber {
                 int quantity = Integer.parseInt(quantityField.getText());
                 String publisher = publisherField.getText();
                 String date = dateField.getText();
-                commandProcessor = BookController.makeCommandProcessor();
+                bookController = BookController.getInstance();
                 if (textBookCheckBox.isSelected()) {
                     String status = statusField.getText();
-                    Command command = new addBookCommand(new TextBook(id, date, price, quantity, publisher, status),
+                    Command command = new editBookCommand(new TextBook(id, date, price, quantity, publisher, status),
                             bookService);
-                    commandProcessor.execute(command);
+                    bookController.execute(command);
                 } else {
 
                     double tax = Double.parseDouble(taxField.getText());
-                    Command command = new addBookCommand(new ReferenceBook(id, date, price, quantity, publisher, tax),
+                    Command command = new editBookCommand(new ReferenceBook(id, date, price, quantity, publisher, tax),
                             bookService);
-                    commandProcessor.execute(command);
+                    bookController.execute(command);
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid input for marks or ID. Please enter valid numbers.");
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a student to edit.");
+            JOptionPane.showMessageDialog(this, "Please select a book to edit.");
         }
     }
 
-    // private void findStudent() {
-    // String idStr = JOptionPane.showInputDialog(this, "Enter the student ID to
-    // find:");
-    // if (idStr != null && !idStr.isEmpty()) {
-    // try {
-    // int id = Integer.parseInt(idStr);
-    // Student student = studentService.findStudent(id);
-    // if (student != null) {
-    // populateInputFields(student);
-    // } else {
-    // JOptionPane.showMessageDialog(this, "Student not found with ID: " + id);
-    // }
-    // } catch (NumberFormatException ex) {
-    // JOptionPane.showMessageDialog(this, "Invalid input for ID. Please enter a
-    // valid number.");
-    // }
-    // }
-    // }
+    private void findBookById() throws SQLException {
+
+        String idStr = JOptionPane.showInputDialog(this, "Enter the Book ID to find:");
+        if (idStr != null && !idStr.isEmpty()) {
+            try {
+                bookController = BookController.getInstance();
+                Command command = new findBookByIdCommand(Integer.parseInt(idStr), bookService);
+                bookController.execute(command);
+                Book book = ((findBookByIdCommand) command).getBook();
+                populateInputFields(book);
+                if (book != null) {
+                    populateInputFields(book);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Book not found with ID: " + idStr);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid input for ID. Please enter a valid number.");
+            }
+        }
+    }
 
     private void showSelectedStudentInfo() throws SQLException {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
             int bookId = (int) bookTable.getValueAt(selectedRow, 0);
-            commandProcessor = BookController.makeCommandProcessor();
-            Command command = new findBookCommand(bookId, bookService);
-            commandProcessor.execute(command);
-            Book book = command.getBook();
+            bookController = BookController.getInstance();
+            Command command = new findBookByIdCommand(bookId, bookService);
+            findBookByIdCommand new_command = (findBookByIdCommand) command;
+            bookController.execute(command);
+            Book book = new_command.getBook();
             if (book != null) {
                 populateInputFields(book);
             }
@@ -350,10 +454,14 @@ public class BookManagementUI extends JFrame implements Subscriber {
             TextBook textBook = (TextBook) book;
             statusField.setText(textBook.getStatus());
             taxField.setText("");
+            textBookCheckBox.setSelected(true);
+            referenceBookCheckBox.setSelected(false);
         } else if (book instanceof ReferenceBook) {
             ReferenceBook referenceBook = (ReferenceBook) book;
             taxField.setText(String.valueOf(referenceBook.getTax()));
             statusField.setText("");
+            referenceBookCheckBox.setSelected(true);
+            textBookCheckBox.setSelected(false);
         } else {
             statusField.setText("");
             taxField.setText("");
@@ -368,6 +476,9 @@ public class BookManagementUI extends JFrame implements Subscriber {
         publisherField.setText("");
         statusField.setText("");
         taxField.setText("");
+        searchField.setText("");
+        textBookCheckBox.setSelected(false);
+        referenceBookCheckBox.setSelected(false);
     }
 
     private void refreshbookTable() throws SQLException {
@@ -375,6 +486,37 @@ public class BookManagementUI extends JFrame implements Subscriber {
         tableModel.setRowCount(0);
 
         List<Book> books = bookService.getAllBooks();
+        updateTableData(books);
+    }
+
+    public void AvgPrice() throws SQLException {
+        bookController = BookController.getInstance();
+        Command command = new AvgPriceBookCommand(bookService);
+        bookController.execute(command);
+        String result = Double.toString(((AvgPriceBookCommand) command).getAvgPriceBook());
+        AvgField.setText(result);
+    }
+
+    public void totalAmountReferenceBook() throws SQLException {
+        bookController = BookController.getInstance();
+        Command totalAmountCommand = new totalAmountReferenceBookCommand(bookService);
+        bookController.execute(totalAmountCommand);
+
+        String result = Double
+                .toString(((totalAmountReferenceBookCommand) totalAmountCommand).getTotalAmountReferenceBook());
+        totalAmountOfReferenceBookField.setText(result);
+    }
+
+    public void totalAmountTextBook() throws SQLException {
+        bookController = BookController.getInstance();
+        Command totalAmountCommand = new totalAmountTextBookCommand(bookService);
+        bookController.execute(totalAmountCommand);
+
+        String result = Double.toString(((totalAmountTextBookCommand) totalAmountCommand).getTotalAmountTextBook());
+        totalAmountOfTextBookField.setText(result);
+    }
+
+    public void updateTableData(List<Book> books) {
         for (Book book : books) {
             if (book instanceof TextBook) {
                 TextBook textBook = (TextBook) book;
@@ -407,29 +549,23 @@ public class BookManagementUI extends JFrame implements Subscriber {
         }
     }
 
-    private void searchBookById() throws SQLException {
-        int bookId = Integer.parseInt(searchField.getText());
-        commandProcessor = BookController.makeCommandProcessor();
-        Command command = new findBookCommand(bookId, bookService);
-        commandProcessor.execute(command);
-        Book book = command.getBook();
-        if (book != null) {
-            populateInputFields(book);
+    private void searchBookByPublisher() throws SQLException {
+        String publisher = searchField.getText();
+        bookController = BookController.getInstance();
+        Command command = new findBookByPublisherCommand(publisher, bookService);
+        bookController.execute(command);
+
+        findBookByPublisherCommand newCommand = (findBookByPublisherCommand) command;
+        List<Book> books = newCommand.getBooks();
+
+        tableModel.setRowCount(0);
+
+        if (books.size() > 0) {
+            updateTableData(books);
+        } else {
+            tableModel.addRow(new Object[] { "No results found", "", "", "", "", "", "", "" });
         }
     }
-
-    // private void populatebookTable(List<Student> students) {
-    // // Clear existing data in the table
-    // tableModel.setRowCount(0);
-
-    // // Populate the table with matching students
-    // for (Student student : students) {
-    // Object[] rowData = { student.getId(), student.getName(), student.getMajor(),
-    // student.getJavaMark(),
-    // student.getHtmlMark(), student.getCssMark() };
-    // tableModel.addRow(rowData);
-    // }
-    // }
 
     public static void main(String[] args) throws SQLException {
         BookPersistenceServiceImpl bookPersistenceServiceImpl = new BookPersistenceServiceImpl();

@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import domain.model.Book;
+
 public class Publisher {
 
     private List<Subscriber> subscribers = new LinkedList<>();
