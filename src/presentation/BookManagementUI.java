@@ -4,13 +4,13 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import commandProcessor.AvgPriceBookCommand;
-import commandProcessor.BookController;
+import commandProcessor.BookServiceController;
 import commandProcessor.Command;
 import commandProcessor.addBookCommand;
 import commandProcessor.editBookCommand;
 import commandProcessor.findBookByIdCommand;
 import commandProcessor.findBookByPublisherCommand;
-import commandProcessor.removeBookCommand;
+import commandProcessor.removeBookByIdCommand;
 import commandProcessor.totalAmountReferenceBookCommand;
 import commandProcessor.totalAmountTextBookCommand;
 import domain.model.Book;
@@ -18,16 +18,19 @@ import domain.model.ReferenceBook;
 import domain.model.TextBook;
 import observer.Subscriber;
 import persistence.*;
+import persistence.DbConnection.DbConnection;
 import domain.*;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
 public class BookManagementUI extends JFrame implements Subscriber {
-    private BookController bookController = null;
+    private BookServiceController bookController;
+    private final JPanel searchPanel;
     private final BookService bookService;
     private final DefaultTableModel tableModel;
     private final JTable bookTable;
@@ -44,9 +47,11 @@ public class BookManagementUI extends JFrame implements Subscriber {
     private final JLabel searchLabel;
     private final JTextField searchField;
     private final JButton searchButton;
+    private final JPanel inputPanel;
 
-    public BookManagementUI(BookService bookService) throws SQLException {
+    public BookManagementUI(BookService bookService, BookServiceController bookServiceController) throws SQLException {
         this.bookService = bookService;
+        this.bookController = bookServiceController;
         ((BookServiceImpl) bookService).subscribe(this);
 
         // Initialize components
@@ -204,7 +209,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
         });
 
         // search
-        JPanel searchPanel = new JPanel(new FlowLayout());
+        searchPanel = new JPanel(new FlowLayout());
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
@@ -221,7 +226,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
         });
 
         // Layout setup
-        JPanel inputPanel = new JPanel(new GridBagLayout());
+        inputPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -335,7 +340,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
             int quantity = Integer.parseInt(quantityField.getText());
             String publisher = publisherField.getText();
             String date = dateField.getText();
-            bookController = BookController.getInstance();
+            bookController = BookServiceController.getInstance();
             if (textBookCheckBox.isSelected()) {
                 String status = statusField.getText();
                 Command command = new addBookCommand(new TextBook(id, date, price, quantity, publisher, status),
@@ -368,8 +373,8 @@ public class BookManagementUI extends JFrame implements Subscriber {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
             int bookId = (int) bookTable.getValueAt(selectedRow, 0);
-            bookController = BookController.getInstance();
-            Command command = new removeBookCommand(bookId, bookService);
+            bookController = BookServiceController.getInstance();
+            Command command = new removeBookByIdCommand(bookId, bookService);
             bookController.execute(command);
             clearInputFields();
         } else {
@@ -386,7 +391,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
                 int quantity = Integer.parseInt(quantityField.getText());
                 String publisher = publisherField.getText();
                 String date = dateField.getText();
-                bookController = BookController.getInstance();
+                bookController = BookServiceController.getInstance();
                 if (textBookCheckBox.isSelected()) {
                     String status = statusField.getText();
                     Command command = new editBookCommand(new TextBook(id, date, price, quantity, publisher, status),
@@ -412,7 +417,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
         String idStr = JOptionPane.showInputDialog(this, "Enter the Book ID to find:");
         if (idStr != null && !idStr.isEmpty()) {
             try {
-                bookController = BookController.getInstance();
+                bookController = BookServiceController.getInstance();
                 Command command = new findBookByIdCommand(Integer.parseInt(idStr), bookService);
                 bookController.execute(command);
                 Book book = ((findBookByIdCommand) command).getBook();
@@ -432,7 +437,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
             int bookId = (int) bookTable.getValueAt(selectedRow, 0);
-            bookController = BookController.getInstance();
+            bookController = BookServiceController.getInstance();
             Command command = new findBookByIdCommand(bookId, bookService);
             findBookByIdCommand new_command = (findBookByIdCommand) command;
             bookController.execute(command);
@@ -490,7 +495,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
     }
 
     public void AvgPrice() throws SQLException {
-        bookController = BookController.getInstance();
+        bookController = BookServiceController.getInstance();
         Command command = new AvgPriceBookCommand(bookService);
         bookController.execute(command);
         String result = Double.toString(((AvgPriceBookCommand) command).getAvgPriceBook());
@@ -498,7 +503,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
     }
 
     public void totalAmountReferenceBook() throws SQLException {
-        bookController = BookController.getInstance();
+        bookController = BookServiceController.getInstance();
         Command totalAmountCommand = new totalAmountReferenceBookCommand(bookService);
         bookController.execute(totalAmountCommand);
 
@@ -508,7 +513,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
     }
 
     public void totalAmountTextBook() throws SQLException {
-        bookController = BookController.getInstance();
+        bookController = BookServiceController.getInstance();
         Command totalAmountCommand = new totalAmountTextBookCommand(bookService);
         bookController.execute(totalAmountCommand);
 
@@ -551,7 +556,7 @@ public class BookManagementUI extends JFrame implements Subscriber {
 
     private void searchBookByPublisher() throws SQLException {
         String publisher = searchField.getText();
-        bookController = BookController.getInstance();
+        bookController = BookServiceController.getInstance();
         Command command = new findBookByPublisherCommand(publisher, bookService);
         bookController.execute(command);
 
@@ -570,7 +575,8 @@ public class BookManagementUI extends JFrame implements Subscriber {
     public static void main(String[] args) throws SQLException {
         BookPersistenceServiceImpl bookPersistenceServiceImpl = new BookPersistenceServiceImpl();
         BookService bookService = new BookServiceImpl(bookPersistenceServiceImpl);
-        BookManagementUI ui = new BookManagementUI(bookService);
+        BookServiceController bookServiceController = BookServiceController.getInstance();
+        BookManagementUI ui = new BookManagementUI(bookService, bookServiceController);
     }
 
     @Override

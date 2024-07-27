@@ -1,7 +1,6 @@
 package domain;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import domain.model.Book;
@@ -28,7 +27,7 @@ public class BookServiceImpl extends Publisher implements BookService {
 
     @Override
     public void removeBook(int id) throws SQLException {
-        persistenceService.deleteStudent(id);
+        persistenceService.deleteBook(id);
         notifySubscribers();
     }
 

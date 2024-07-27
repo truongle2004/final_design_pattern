@@ -42,7 +42,7 @@ public class BookPersistenceServiceImpl implements BookPersistenceService {
     }
 
     @Override
-    public void deleteStudent(int id) throws SQLException {
+    public void deleteBook(int id) throws SQLException {
         String query = "delete from book where id = ?";
         connection = DbConnection.getDbConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(query);

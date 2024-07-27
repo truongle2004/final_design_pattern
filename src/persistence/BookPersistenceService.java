@@ -8,7 +8,7 @@ import domain.model.Book;
 public interface BookPersistenceService {
     void saveBook(Book book) throws SQLException;
 
-    void deleteStudent(int id) throws SQLException;
+    void deleteBook(int id) throws SQLException;
 
     void updateBook(Book book) throws SQLException;
 

@@ -4,10 +4,10 @@ import java.sql.SQLException;
 
 import domain.BookService;
 
-public class removeBookCommand extends Command {
+public class removeBookByIdCommand extends Command {
     private int id;
 
-    public removeBookCommand(int id, BookService bookService) {
+    public removeBookByIdCommand(int id, BookService bookService) {
         this.bookService = bookService;
         this.id = id;
     }

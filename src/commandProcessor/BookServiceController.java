@@ -2,12 +2,12 @@ package commandProcessor;
 
 import java.sql.SQLException;
 
-public class BookController {
-    private static BookController bookController = null;
+public class BookServiceController {
+    private static BookServiceController bookController = null;
 
-    public static BookController getInstance() {
+    public static BookServiceController getInstance() {
         if (bookController == null) {
-            bookController = new BookController();
+            bookController = new BookServiceController();
         }
         return bookController;
     }
