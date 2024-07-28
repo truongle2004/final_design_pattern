@@ -8,7 +8,7 @@ public class totalAmountTextBookCommand extends Command {
     private double totalAmountTextBook;
 
     public totalAmountTextBookCommand(BookService bookService) {
-        this.bookService = bookService;
+        super(bookService);
     }
 
     public double getTotalAmountTextBook() {

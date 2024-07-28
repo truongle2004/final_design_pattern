@@ -7,8 +7,10 @@ import domain.model.Book;
 
 public abstract class Command {
     protected BookService bookService;
-    protected Book book;
 
+    public Command(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     public abstract void execute() throws SQLException;
 }

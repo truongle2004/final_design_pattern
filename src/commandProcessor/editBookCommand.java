@@ -6,9 +6,10 @@ import domain.BookService;
 import domain.model.Book;
 
 public class editBookCommand extends Command {
+    private Book book;
+
     public editBookCommand(Book book, BookService bookService) {
-        this.book = book;
-        this.bookService = bookService;
+        super(bookService);
     }
 
     @Override

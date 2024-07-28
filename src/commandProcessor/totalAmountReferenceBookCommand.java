@@ -8,7 +8,7 @@ public class totalAmountReferenceBookCommand extends Command {
     private double totalAmountReferenceBook;
 
     public totalAmountReferenceBookCommand(BookService bookService) {
-        this.bookService = bookService;
+        super(bookService);
     }
 
     public double getTotalAmountReferenceBook() {

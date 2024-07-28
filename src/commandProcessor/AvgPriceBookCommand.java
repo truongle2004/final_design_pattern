@@ -8,7 +8,7 @@ public class AvgPriceBookCommand extends Command {
     private double avgPriceBook;
 
     public AvgPriceBookCommand(BookService bookService) {
-        this.bookService = bookService;
+        super(bookService);
     }
 
     public double getAvgPriceBook() {

@@ -12,7 +12,7 @@ public class findBookByPublisherCommand extends Command {
     private List<Book> books = new ArrayList<Book>();
 
     public findBookByPublisherCommand(String publisher, BookService bookService) {
-        this.bookService = bookService;
+        super(bookService);
         this.publisher = publisher;
     }
 

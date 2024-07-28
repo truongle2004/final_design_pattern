@@ -8,7 +8,7 @@ public class removeBookByIdCommand extends Command {
     private int id;
 
     public removeBookByIdCommand(int id, BookService bookService) {
-        this.bookService = bookService;
+        super(bookService);
         this.id = id;
     }
 

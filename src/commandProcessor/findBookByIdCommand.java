@@ -7,10 +7,11 @@ import domain.model.Book;
 
 public class findBookByIdCommand extends Command {
     private int id;
+    private Book book;
 
     public findBookByIdCommand(int id, BookService bookService) {
+        super(bookService);
         this.id = id;
-        this.bookService = bookService;
     }
 
     public Book getBook() {
