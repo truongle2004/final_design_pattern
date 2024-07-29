@@ -1,6 +1,7 @@
 package domain.model;
 
 public class TextBook extends Book {
+
     private String status;
 
     public TextBook(int id, String date, double price, int quantity, String publisher, String status) {
@@ -8,19 +9,15 @@ public class TextBook extends Book {
         this.status = status;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    private String getStatus() {
+        return this.status;
     }
 
     @Override
     public double calculateTotalAmount() {
-        if (this.status.equals("new")) {
-            return getQuantity() * getPrice();
+        if (getStatus() == "new") {
+            return getPrice() * getQuantity();
         }
-        return getQuantity() * getPrice() * 0.5;
+        return getPrice() * getQuantity() * 0.5;
     }
 }

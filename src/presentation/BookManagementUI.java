@@ -18,13 +18,11 @@ import domain.model.ReferenceBook;
 import domain.model.TextBook;
 import observer.Subscriber;
 import persistence.*;
-import persistence.DbConnection.DbConnection;
 import domain.*;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -343,8 +341,8 @@ public class BookManagementUI extends JFrame implements Subscriber {
             bookController = BookServiceController.getInstance();
             if (textBookCheckBox.isSelected()) {
                 String status = statusField.getText();
-                Command command = new addBookCommand(new TextBook(id, date, price, quantity, publisher, status),
-                        bookService);
+                Book book = new TextBook(id, date, price, quantity, publisher, status);
+                Command command = new addBookCommand(book, bookService);
                 bookController.execute(command);
             } else {
 
@@ -394,14 +392,14 @@ public class BookManagementUI extends JFrame implements Subscriber {
                 bookController = BookServiceController.getInstance();
                 if (textBookCheckBox.isSelected()) {
                     String status = statusField.getText();
-                    Command command = new editBookCommand(new TextBook(id, date, price, quantity, publisher, status),
-                            bookService);
+                    Book book = new TextBook(id, date, price, quantity, publisher, status);
+                    Command command = new editBookCommand(book, bookService);
                     bookController.execute(command);
                 } else {
 
                     double tax = Double.parseDouble(taxField.getText());
-                    Command command = new editBookCommand(new ReferenceBook(id, date, price, quantity, publisher, tax),
-                            bookService);
+                    Book book = new ReferenceBook(id, date, price, quantity, publisher, tax);
+                    Command command = new editBookCommand(book, bookService);
                     bookController.execute(command);
                 }
             } catch (NumberFormatException ex) {
