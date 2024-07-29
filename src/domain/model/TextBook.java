@@ -9,7 +9,7 @@ public class TextBook extends Book {
         this.status = status;
     }
 
-    private String getStatus() {
+    public String getStatus() {
         return this.status;
     }
 
